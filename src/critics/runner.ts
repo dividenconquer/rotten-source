@@ -20,7 +20,7 @@ export const run = async (repo: string) => {
 
     for (const file_path of runnable_files) {
         const func = await import('./' + file_path)
-        const score = await func.default.default(owner, name).catch((error: any) => console.error(error))
+        const score = await func.default.default(owner, name).catch((error: any) => { })
 
         if (score !== undefined) {
             // exclude lane result when errored
@@ -46,6 +46,9 @@ export const run = async (repo: string) => {
         return { ...acc, [critic]: { score: parseFloat((obj.totalScore / obj.lanes.length).toFixed(1)), lanes: obj.lanes } }
     }, {})
 
+    if (Object.keys(formatted_with_avg_score).length === 0) {
+        throw new Error("No critic lane was successful")
+    }
     // calculate average score for repo
     const repo_avg_score = parseFloat((Object.values(formatted_with_avg_score).reduce((sum, critic) => sum + critic.score, 0) / Object.keys(formatted_with_avg_score).length).toFixed(1))
 
